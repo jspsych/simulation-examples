@@ -1,0 +1,96 @@
+<!DOCTYPE html>
+<head>
+  <script src="https://unpkg.com/jspsych@7.1.0"></script>
+  <script src="https://unpkg.com/@jspsych/plugin-html-keyboard-response@1.1.0"></script>
+  <script src="https://unpkg.com/@jspsych/plugin-visual-search-circle@1.1.0"></script>
+  <link rel="stylesheet" href="https://unpkg.com/jspsych@7.1.0/css/jspsych.css">
+</head>
+<body>
+</body>
+<script>
+  const jsPsych = initJsPsych();
+
+  const instructions = {
+    type: jsPsychHtmlKeyboardResponse,
+    stimulus: `<p>You'll see a set of Xs and Os arranged in a circle.</p>
+      <p>If there is a red X, press the X key on the keyboard.</p>
+      <p>If there is no red X, pree the N key on the keyboard.</p>
+      <p>Try to answer as quickly as possible.</p>
+      <p>Press the spacebar to begin.</p>`,
+    choices: [' ']
+  }
+
+  const visual_search = {
+    type: jsPsychVisualSearchCircle,
+    stimuli: function(){
+      return jsPsych.randomization.shuffle(jsPsych.timelineVariable('stimuli'))
+    },
+    target_present: jsPsych.timelineVariable('target_present'),
+    fixation_image: 'img/fixation.gif',
+    target_present_key: 'x',
+    target_absent_key: 'n',
+    data: {
+      search_type: jsPsych.timelineVariable('search_type'),
+      set_size: jsPsych.timelineVariable('set_size')
+    }    
+  }
+
+  const visual_search_timeline = {
+    timeline: [visual_search],
+    timeline_variables: [
+      {stimuli: ['img/redX.png', 'img/redO.png', 'img/blackX.png', 'img/blackX.png'], target_present: true, set_size: 4, search_type: 'conjunction'},
+      {stimuli: ['img/redO.png', 'img/redO.png', 'img/blackX.png', 'img/blackX.png'], target_present: false, set_size: 4, search_type: 'conjunction'},
+      {stimuli: ['img/redX.png', 'img/redO.png', 'img/redO.png', 'img/blackX.png', 'img/blackX.png', 'img/blackX.png'], target_present: true, set_size: 6, search_type: 'conjunction'},
+      {stimuli: ['img/redO.png', 'img/redO.png', 'img/redO.png', 'img/blackX.png', 'img/blackX.png', 'img/blackX.png'], target_present: false, set_size: 6, search_type: 'conjunction'},
+      {stimuli: ['img/redX.png', 'img/redO.png', 'img/redO.png', 'img/redO.png', 'img/blackX.png', 'img/blackX.png', 'img/blackX.png','img/blackX.png'], target_present: true, set_size: 8, search_type: 'conjunction'},
+      {stimuli: ['img/redO.png', 'img/redO.png', 'img/redO.png', 'img/redO.png', 'img/blackX.png', 'img/blackX.png', 'img/blackX.png','img/blackX.png'], target_present: false, set_size: 8, search_type: 'conjunction'},
+      {stimuli: ['img/redX.png', 'img/blackX.png', 'img/blackX.png', 'img/blackX.png'], target_present: true, set_size: 4, search_type: 'feature'},
+      {stimuli: ['img/blackX.png', 'img/blackX.png', 'img/blackX.png', 'img/blackX.png'], target_present: false, set_size: 4, search_type: 'feature'},
+      {stimuli: ['img/redX.png', 'img/blackX.png', 'img/blackX.png', 'img/blackX.png', 'img/blackX.png', 'img/blackX.png'], target_present: true, set_size: 6, search_type: 'feature'},
+      {stimuli: ['img/blackX.png', 'img/blackX.png', 'img/blackX.png', 'img/blackX.png', 'img/blackX.png', 'img/blackX.png'], target_present: false, set_size: 6, search_type: 'feature'},
+      {stimuli: ['img/redX.png', 'img/blackX.png', 'img/blackX.png', 'img/blackX.png', 'img/blackX.png', 'img/blackX.png', 'img/blackX.png','img/blackX.png'], target_present: true, set_size: 8, search_type: 'feature'},
+      {stimuli: ['img/blackX.png', 'img/blackX.png', 'img/blackX.png', 'img/blackX.png', 'img/blackX.png', 'img/blackX.png', 'img/blackX.png','img/blackX.png'], target_present: false, set_size: 8, search_type: 'feature'},
+    ],
+    sample: {
+      type: 'fixed-repetitions',
+      size: 7
+    }
+  }
+
+  const feedback = {
+    type: jsPsychHtmlKeyboardResponse,
+    stimulus: function(){
+      const rt_4_conjunction = Math.round(jsPsych.data.get().filter({set_size:4, target_present:true, correct:true, search_type:'conjunction'}).select('rt').mean());
+      const rt_6_conjunction = Math.round(jsPsych.data.get().filter({set_size:6, target_present:true, correct:true, search_type:'conjunction'}).select('rt').mean());
+      const rt_8_conjunction = Math.round(jsPsych.data.get().filter({set_size:8, target_present:true, correct:true, search_type:'conjunction'}).select('rt').mean());
+      const rt_4_feature = Math.round(jsPsych.data.get().filter({set_size:4, target_present:true, correct:true, search_type:'feature'}).select('rt').mean());
+      const rt_6_feature = Math.round(jsPsych.data.get().filter({set_size:6, target_present:true, correct:true, search_type:'feature'}).select('rt').mean());
+      const rt_8_feature = Math.round(jsPsych.data.get().filter({set_size:8, target_present:true, correct:true, search_type:'feature'}).select('rt').mean());
+
+      return `
+        <p>For feature search, target present, correct answers only.</p>
+        <p>Average RT for set size 4: ${rt_4_feature}</p>
+        <p>Average RT for set size 6: ${rt_6_feature}</p>
+        <p>Average RT for set size 8: ${rt_8_feature}</p>
+        <p>For feature search, target present, correct answers only.</p>
+        <p>Average RT for set size 4: ${rt_4_conjunction}</p>
+        <p>Average RT for set size 6: ${rt_6_conjunction}</p>
+        <p>Average RT for set size 8: ${rt_8_conjunction}</p>`
+    },
+    choices: "NO_KEYS",
+    simulation_options: {
+      simulate: false
+    }
+  }
+
+  const timeline = [
+    instructions,
+    visual_search_timeline,
+    feedback
+  ]
+
+  jsPsych.simulate(timeline, "data-only")
+
+
+
+</script>
