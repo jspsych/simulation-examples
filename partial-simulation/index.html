@@ -72,7 +72,7 @@
         <p>Average RT for set size 4: ${rt_4_feature}</p>
         <p>Average RT for set size 6: ${rt_6_feature}</p>
         <p>Average RT for set size 8: ${rt_8_feature}</p>
-        <p>For feature search, target present, correct answers only.</p>
+        <p>For conjunction search, target present, correct answers only.</p>
         <p>Average RT for set size 4: ${rt_4_conjunction}</p>
         <p>Average RT for set size 6: ${rt_6_conjunction}</p>
         <p>Average RT for set size 8: ${rt_8_conjunction}</p>`
@@ -89,8 +89,8 @@
     feedback
   ]
 
-  jsPsych.simulate(timeline, "data-only")
-
+  //jsPsych.simulate(timeline, "data-only")
+  jsPsych.run(timeline);
 
 
 </script>
