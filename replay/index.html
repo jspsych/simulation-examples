@@ -1,0 +1,86 @@
+<!DOCTYPE html>
+<head>
+  <script src="https://unpkg.com/jspsych@7.1.1"></script>
+  <script src="https://unpkg.com/@jspsych/plugin-html-button-response@1.1.0"></script>
+  <script src="https://unpkg.com/@jspsych/plugin-serial-reaction-time@1.1.0"></script>
+  <link rel="stylesheet" href="https://unpkg.com/jspsych@7.1.1/css/jspsych.css">
+</head>
+<body>
+</body>
+<script>
+
+  run();
+
+  function run(){
+    const jsPsych = initJsPsych({
+      on_finish: function(){
+        replay(jsPsych.data.get().readOnly().values());
+      }
+    });
+
+    const timeline = create_srt_timeline(jsPsych);
+
+    jsPsych.run(timeline);
+  }
+
+  function replay(data){
+    const simulation_options = {};
+    
+    for(const trial of data){
+      simulation_options[trial.trial_index] = {
+        data: {
+          response: trial.response,
+          rt: trial.rt
+        }
+      }
+    }
+    
+
+    const jsPsych = initJsPsych();
+
+    const timeline = create_srt_timeline(jsPsych);
+
+    jsPsych.simulate(timeline, "visual", simulation_options)
+  }
+
+  function create_srt_timeline(jsPsych){
+    const srt = {
+      timeline: [
+        {
+          type: jsPsychSerialReactionTime,
+          choices: [['f','g','h','j']],
+          target: jsPsych.timelineVariable('target'),
+          show_response_feedback: true,
+          simulation_options: ()=>{
+            return jsPsych.getProgress().current_trial_global.toString();
+          },
+        }
+      ],
+      timeline_variables: [
+        { target: [0,0] },
+        { target: [0,1] },
+        { target: [0,3] },
+        { target: [0,2] },
+        { target: [0,3] },
+        { target: [0,0] },
+        { target: [0,1] },
+        { target: [0,2] }
+      ],
+      loop_function: function(){
+        const total_reps = jsPsych.data.get().filter({trial_type: 'serial-reaction-time'}).count() / 2;
+        return total_reps < 1;
+      }
+    }
+
+    const end = {
+      type: jsPsychHtmlButtonResponse,
+      stimulus: '',
+      choices: ['Watch replay']
+    }
+
+    const timeline = [srt, end];
+
+    return timeline;
+  }
+
+</script>
