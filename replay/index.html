@@ -190,8 +190,8 @@
         { target: [0,2] }
       ],
       loop_function: function(){
-        const total_reps = jsPsych.data.get().filter({trial_type: 'serial-reaction-time'}).count() / 2;
-        return total_reps < 1;
+        const total_reps = jsPsych.data.get().filter({trial_type: 'serial-reaction-time'}).count() / 8;
+        return total_reps < 2;
       }
     }
 
