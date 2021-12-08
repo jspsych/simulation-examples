@@ -20,6 +20,14 @@
 
     const timeline = create_srt_timeline(jsPsych);
 
+    const end = {
+      type: jsPsychHtmlButtonResponse,
+      stimulus: '',
+      choices: ['Watch replay']
+    }
+
+    timeline.push(end);
+
     jsPsych.run(timeline);
   }
 
@@ -44,6 +52,118 @@
   }
 
   function create_srt_timeline(jsPsych){
+
+    const instructions = {
+      timeline: [
+        {
+          type: jsPsychSerialReactionTime,
+          choices: [['c', 'g', 'h', 'j']],
+          target: [0,0],
+          target_color: 'white',
+          prompt: `<div style="position:absolute; left: 0px; width:100%;">
+            <p>In this experiment the goal is to see how fast you can respond to a cue.</p>
+            <p>Press C to continue.</p>
+            </div>
+          `,
+          simulation_options: ()=>{
+            return jsPsych.getProgress().current_trial_global.toString();
+          }
+        },
+        {
+          type: jsPsychSerialReactionTime,
+          choices: [['f', '', '', '']],
+          target: [0,0],
+          show_response_feedback: true,
+          prompt: `<div style="position:absolute; left: 0px; width:100%;">
+            <p>One of the squares above will change color.</p>
+            <p>Use the keys F G H J to respond.</p>
+            <p>Press F for the 1st square (press F now).</p>
+            </div>
+          `,
+          simulation_options: ()=>{
+            return jsPsych.getProgress().current_trial_global.toString();
+          }
+        },
+        {
+          type: jsPsychSerialReactionTime,
+          choices: [['', 'g', '', '']],
+          target: [0,1],
+          show_response_feedback: true,
+          prompt: `<div style="position:absolute; left: 0px; width:100%;">
+            <p>Press G for the 2nd square (press G now).</p>
+            </div>
+          `,
+          simulation_options: ()=>{
+            return jsPsych.getProgress().current_trial_global.toString();
+          }
+        },
+        {
+          type: jsPsychSerialReactionTime,
+          choices: [['', '', 'h', '']],
+          target: [0,2],
+          show_response_feedback: true,
+          prompt: `<div style="position:absolute; left: 0px; width:100%;">
+            <p>Press H for the 3rd square (press H now).</p>
+            </div>
+          `,
+          simulation_options: ()=>{
+            return jsPsych.getProgress().current_trial_global.toString();
+          }
+        },
+        {
+          type: jsPsychSerialReactionTime,
+          choices: [['', '', '', 'j']],
+          target: [0,3],
+          show_response_feedback: true,
+          prompt: `<div style="position:absolute; left: 0px; width:100%;">
+            <p>Press J for the 4th square (press J now).</p>
+            </div>
+          `,
+          simulation_options: ()=>{
+            return jsPsych.getProgress().current_trial_global.toString();
+          }
+        },
+        {
+          type: jsPsychSerialReactionTime,
+          choices: [['f', '', '', '']],
+          target: [0,3],
+          show_response_feedback: true,
+          prompt: `<div style="position:absolute; left: 0px; width:100%;">
+            <p>The squares will change color to show you if you responded correctly.</p>
+            <p>Press F to make the wrong response on this example.</p>
+            </div>
+          `,
+          simulation_options: ()=>{
+            return jsPsych.getProgress().current_trial_global.toString();
+          }
+        },
+        {
+          type: jsPsychSerialReactionTime,
+          choices: [['f', 'g', 'h', 'j']],
+          target: [0,0],
+          target_color: 'white',
+          prompt: `<div style="position:absolute; left: 0px; width:100%;">
+            <p>When you are ready to start, press F G H or J to begin.</p>
+            </div>
+          `,
+          simulation_options: ()=>{
+            return jsPsych.getProgress().current_trial_global.toString();
+          }
+        },
+        {
+          type: jsPsychSerialReactionTime,
+          choices: ['null', 'null1', 'null2', 'null3'],
+          target: [0,0],
+          target_color: 'white',
+          trial_duration: 1500,
+          simulation_options: ()=>{
+            return jsPsych.getProgress().current_trial_global.toString();
+          }
+        },
+      ]
+      
+    }
+
     const srt = {
       timeline: [
         {
@@ -51,6 +171,9 @@
           choices: [['f','g','h','j']],
           target: jsPsych.timelineVariable('target'),
           show_response_feedback: true,
+          data: {
+            task: 'respond'
+          },
           simulation_options: ()=>{
             return jsPsych.getProgress().current_trial_global.toString();
           },
@@ -72,13 +195,7 @@
       }
     }
 
-    const end = {
-      type: jsPsychHtmlButtonResponse,
-      stimulus: '',
-      choices: ['Watch replay']
-    }
-
-    const timeline = [srt, end];
+    const timeline = [instructions, srt];
 
     return timeline;
   }
