@@ -1,0 +1,172 @@
+<!DOCTYPE html>
+<head>
+  <script src="https://unpkg.com/jspsych@7.1.2"></script>
+  <script src="https://unpkg.com/@jspsych/plugin-html-button-response@1.1.0"></script>
+  <script src="https://unpkg.com/@jspsych/plugin-html-keyboard-response@1.1.0"></script>
+  <link rel="stylesheet" href="https://unpkg.com/jspsych@7.1.2/css/jspsych.css">
+  <style>
+    .stimulus {
+      font-size: 40px;
+    }
+  </style>
+</head>
+<body>
+</body>
+<script>
+
+const jsPsych = initJsPsych({
+  on_finish: function(){
+    test();
+  }
+});
+
+const instructions = {
+  type: jsPsychHtmlButtonResponse,
+  stimulus: `
+    <p>This experiment measures how fast you can identify whether a number is odd or even.</p>
+    <p>You'll see a number appear on the screen. As quickly as you can:</p>
+    <p>Press the A key if the number is odd.</p>
+    <p>Press the L key if the number is even.</p>
+  `,
+  choices: ['I understand the instructions']
+}
+
+const instruction_check = {
+  timeline: [
+    {
+      type: jsPsychHtmlButtonResponse,
+      stimulus: ()=>{ return `
+        <p class="stimulus">${jsPsych.timelineVariable('number')}</p>
+      `},
+      choices: ['A', 'L'],
+      prompt: '<p>To see if you understood the instructions, which key should you press if you see this number?</p>',
+      data: {
+        task: 'instructions-check'
+      },
+      on_finish: (data) => {
+        data.correct = data.response == jsPsych.timelineVariable('answer');
+      }
+    }
+  ],
+  timeline_variables: [
+    {number: 3, answer: 0},
+    {number: 6, answer: 1}
+  ],
+  randomize_order: true  
+}
+
+const instructions_check_fail = {
+  timeline: [
+    {
+      type: jsPsychHtmlButtonResponse,
+      stimulus: `<p>You did not answer the questions correctly.</p>
+        <p>We'll show you the instructions again.</p>
+      `,
+      choices: ['Got it']
+    }
+  ],
+  conditional_function: ()=>{
+    const ic_data = jsPsych.data.get().filter({task: 'instructions-check'}).last(2);
+    return !ic_data.select('correct').all((value)=>{return value==true});
+  }
+}
+
+const instructions_loop = {
+  timeline: [instructions, instruction_check, instructions_check_fail],
+  loop_function: (data)=>{
+    return !data.filter({task: 'instructions-check'}).select('correct').all((value)=>{return value==true});
+  }
+}
+
+const pre_task_start = {
+  type: jsPsychHtmlKeyboardResponse,
+  stimulus: `<p>Great! You are ready to begin the task.</p>
+    <p>Please place your hands over the A and L keys.</p>
+    <p>Press either A or L to begin.</p>
+  `,
+  choices: ['a','l']
+}
+
+const snarc = {
+  timeline: [
+    {
+      type: jsPsychHtmlKeyboardResponse,
+      stimulus: `<p class="stimulus">+</p>`,
+      trial_duration: 500,
+      choices: "NO_KEYS"
+    },
+    {
+      type: jsPsychHtmlKeyboardResponse,
+      stimulus: ()=>{ 
+        return `<p class="stimulus">${jsPsych.timelineVariable('number')}</p>`
+      },
+      choices: ['a','l'],
+      data: {
+        digit: jsPsych.timelineVariable('number'),
+        parity: jsPsych.timelineVariable('parity'),
+        magnitude: jsPsych.timelineVariable('magnitude')
+      }
+    }
+  ],
+  timeline_variables: [
+    {number: 1, parity: 'odd', magnitude: 'small'},
+    {number: 2, parity: 'even', magnitude: 'small'},
+    {number: 3, parity: 'odd', magnitude: 'small'},
+    {number: 4, parity: 'even', magnitude: 'small'},
+    {number: 6, parity: 'even', magnitude: 'large'},
+    {number: 7, parity: 'odd', magnitude: 'large'},
+    {number: 8, parity: 'even', magnitude: 'large'},
+    {number: 9, parity: 'odd', magnitude: 'large'}
+  ],
+  sample: {
+    type: 'fixed-repetitions',
+    size: 5
+  }
+}
+
+jsPsych.simulate([instructions_loop, pre_task_start, snarc]);
+
+function test(){
+  const data = jsPsych.data.get();
+
+  let test_results = '';
+
+  // check that there are an equal number of all trial types
+  const all_equal = [
+    data.filter({parity: 'odd', magnitude: 'small'}).count(),
+    data.filter({parity: 'odd', magnitude: 'large'}).count(),
+    data.filter({parity: 'even', magnitude: 'small'}).count(),
+    data.filter({parity: 'even', magnitude: 'large'}).count()
+  ].every((value, i, array)=>{ return value === array[0] });
+  
+  if(all_equal){
+    test_results += '<p>✔️ Equal number of all trial types</p>'
+  } else {
+    test_results += '<p>❌ Unequal number of all trial types</p>'
+  }
+
+  // check that answering the instructions incorrectly causes a loop
+  const looped = data.filter({task:'instructions-check'}).count() > 2;
+  if(!data.filter({task: 'instructions-check'}).first(2).select('correct').all((x)=>{return x==true})){
+    if(looped){
+      test_results += '<p>✔️ Instructions looped on check fail</p>'
+    } else {
+      test_results += '<p>❌ Instructions did not loop on check fail</p>'
+    }
+  } else {
+    if(!looped){
+      test_results += '<p>✔️ Instructions did not loop on check pass</p>'
+    } else {
+      test_results += '<p>❌ Instructions looped on check pass</p>'
+    }
+  }
+
+  jsPsych.getDisplayElement().innerHTML = test_results;
+
+}
+
+
+
+
+
+</script>
