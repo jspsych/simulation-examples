@@ -20,7 +20,7 @@
 <div id="foo" style="visibility: hidden;"></div>
 <script>
 
-async function simulateExperiment(){
+async function simulateExperiment(simulation_options){
 
   return new Promise((resolve)=>{
 
@@ -56,12 +56,13 @@ async function simulateExperiment(){
           },
           on_finish: (data) => {
             data.correct = data.response == jsPsych.timelineVariable('answer');
-          }
+          },
+          simulation_options: jsPsych.timelineVariable('trial_id')
         }
       ],
       timeline_variables: [
-        {number: 3, answer: 0},
-        {number: 6, answer: 1}
+        {number: 3, answer: 0, trial_id: 'odd_key'},
+        {number: 6, answer: 1, trial_id: 'even_key'}
       ],
       randomize_order: true  
     }
@@ -135,7 +136,7 @@ async function simulateExperiment(){
       }
     }
 
-    jsPsych.simulate([instructions_loop, pre_task_start, snarc]);
+    jsPsych.simulate([instructions_loop, pre_task_start, snarc], "data-only", simulation_options);
   });
 }
 
@@ -157,13 +158,56 @@ describe("snarc experiment", ()=>{
 
   it("loops if the instructions check is failed", async ()=>{
 
-    const data = await simulateExperiment();
+    let first_time = true;
+
+    const simulation_options = {
+      odd_key: {
+        data: {
+          response: ()=>{
+            if(first_time){
+              first_time = false;
+              return 1;
+            } else {
+              return 0;
+            }
+          }
+        }
+      },
+      even_key: {
+        data: {
+          response: 1
+        }
+      }
+    }
+
+    const data = await simulateExperiment(simulation_options);
 
     const looped = data.filter({task:'instructions-check'}).count() > 2;
-    const should_loop = !data.filter({task: 'instructions-check'}).first(2).select('correct').all((x)=>{return x==true});
     
-    expect(looped).toBe(should_loop);
-  })
+    expect(looped).toBe(true);
+  });
+
+  it("does not loop if the instructions check is passed", async ()=>{
+
+    const simulation_options = {
+      odd_key: {
+        data: {
+          response: 0
+        }
+      },
+      even_key: {
+        data: {
+          response: 1
+        }
+      }
+    }
+
+    const data = await simulateExperiment(simulation_options);
+
+    const looped = data.filter({task:'instructions-check'}).count() > 2;
+
+    expect(looped).toBe(false);
+  });
 });
 
 </script>
