@@ -7,30 +7,24 @@
   <script src="https://cdn.jsdelivr.net/npm/jasmine-core@3.10.1/lib/jasmine-core/jasmine-html.js"></script>
   <script src="https://cdn.jsdelivr.net/npm/jasmine-core@3.10.1/lib/jasmine-core/boot0.js"></script>
   <script src="https://cdn.jsdelivr.net/npm/jasmine-core@3.10.1/lib/jasmine-core/boot1.js"></script>
-  <link rel="stylesheet" href="https://unpkg.com/jspsych@7.1.2/css/jspsych.css">
-  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/jasmine-core@3.10.1/lib/jasmine-core/jasmine.css">
+  <link
+    rel="stylesheet"
+    href="https://unpkg.com/jspsych@7.1.2/css/jspsych.css"
+  />
+  <link
+    rel="stylesheet"
+    href="https://cdn.jsdelivr.net/npm/jasmine-core@3.10.1/lib/jasmine-core/jasmine.css"
+  />
   <style>
     .stimulus {
       font-size: 40px;
     }
   </style>
 </head>
-<body>
-</body>
-<div id="foo" style="visibility: hidden;"></div>
+<body></body>
 <script>
 
-async function simulateExperiment(simulation_options){
-
-  return new Promise((resolve)=>{
-
-    const jsPsych = initJsPsych({
-      display_element: 'foo',
-      on_finish: function(){
-        resolve(jsPsych.data.get());
-      }
-    });
-
+  function create_timeline(jsPsych) {
     const instructions = {
       type: jsPsychHtmlButtonResponse,
       stimulus: `
@@ -39,33 +33,36 @@ async function simulateExperiment(simulation_options){
         <p>Press the A key if the number is odd.</p>
         <p>Press the L key if the number is even.</p>
       `,
-      choices: ['I understand the instructions']
-    }
+      choices: ["I understand the instructions"],
+    };
 
     const instruction_check = {
       timeline: [
         {
           type: jsPsychHtmlButtonResponse,
-          stimulus: ()=>{ return `
-            <p class="stimulus">${jsPsych.timelineVariable('number')}</p>
-          `},
-          choices: ['A', 'L'],
-          prompt: '<p>To see if you understood the instructions, which key should you press if you see this number?</p>',
+          stimulus: () => {
+            return `
+            <p class="stimulus">${jsPsych.timelineVariable("number")}</p>
+          `;
+          },
+          choices: ["A", "L"],
+          prompt:
+            "<p>To see if you understood the instructions, which key should you press if you see this number?</p>",
           data: {
-            task: 'instructions-check'
+            task: "instructions-check",
           },
           on_finish: (data) => {
-            data.correct = data.response == jsPsych.timelineVariable('answer');
+            data.correct = data.response == jsPsych.timelineVariable("answer");
           },
-          simulation_options: jsPsych.timelineVariable('trial_id')
-        }
+          simulation_options: jsPsych.timelineVariable("trial_id"),
+        },
       ],
       timeline_variables: [
-        {number: 3, answer: 0, trial_id: 'odd_key'},
-        {number: 6, answer: 1, trial_id: 'even_key'}
+        { number: 3, answer: 0, trial_id: "odd_key" },
+        { number: 6, answer: 1, trial_id: "even_key" },
       ],
-      randomize_order: true  
-    }
+      randomize_order: true,
+    };
 
     const instructions_check_fail = {
       timeline: [
@@ -74,21 +71,31 @@ async function simulateExperiment(simulation_options){
           stimulus: `<p>You did not answer the questions correctly.</p>
             <p>We'll show you the instructions again.</p>
           `,
-          choices: ['Got it']
-        }
+          choices: ["Got it"],
+        },
       ],
-      conditional_function: ()=>{
-        const ic_data = jsPsych.data.get().filter({task: 'instructions-check'}).last(2);
-        return !ic_data.select('correct').all((value)=>{return value==true});
-      }
-    }
+      conditional_function: () => {
+        const ic_data = jsPsych.data
+          .get()
+          .filter({ task: "instructions-check" })
+          .last(2);
+        return !ic_data.select("correct").all((value) => {
+          return value == true;
+        });
+      },
+    };
 
     const instructions_loop = {
       timeline: [instructions, instruction_check, instructions_check_fail],
-      loop_function: (data)=>{
-        return !data.filter({task: 'instructions-check'}).select('correct').all((value)=>{return value==true});
-      }
-    }
+      loop_function: (data) => {
+        return !data
+          .filter({ task: "instructions-check" })
+          .select("correct")
+          .all((value) => {
+            return value == true;
+          });
+      },
+    };
 
     const pre_task_start = {
       type: jsPsychHtmlKeyboardResponse,
@@ -96,8 +103,8 @@ async function simulateExperiment(simulation_options){
         <p>Please place your hands over the A and L keys.</p>
         <p>Press either A or L to begin.</p>
       `,
-      choices: ['a','l']
-    }
+      choices: ["a", "l"],
+    };
 
     const snarc = {
       timeline: [
@@ -105,109 +112,131 @@ async function simulateExperiment(simulation_options){
           type: jsPsychHtmlKeyboardResponse,
           stimulus: `<p class="stimulus">+</p>`,
           trial_duration: 500,
-          choices: "NO_KEYS"
+          choices: "NO_KEYS",
         },
         {
           type: jsPsychHtmlKeyboardResponse,
-          stimulus: ()=>{ 
-            return `<p class="stimulus">${jsPsych.timelineVariable('number')}</p>`
+          stimulus: () => {
+            return `<p class="stimulus">${jsPsych.timelineVariable(
+              "number"
+            )}</p>`;
           },
-          choices: ['a','l'],
+          choices: ["a", "l"],
           data: {
-            digit: jsPsych.timelineVariable('number'),
-            parity: jsPsych.timelineVariable('parity'),
-            magnitude: jsPsych.timelineVariable('magnitude')
-          }
-        }
+            digit: jsPsych.timelineVariable("number"),
+            parity: jsPsych.timelineVariable("parity"),
+            magnitude: jsPsych.timelineVariable("magnitude"),
+          },
+        },
       ],
       timeline_variables: [
-        {number: 1, parity: 'odd', magnitude: 'small'},
-        {number: 2, parity: 'even', magnitude: 'small'},
-        {number: 3, parity: 'odd', magnitude: 'small'},
-        {number: 4, parity: 'even', magnitude: 'small'},
-        {number: 6, parity: 'even', magnitude: 'large'},
-        {number: 7, parity: 'odd', magnitude: 'large'},
-        {number: 8, parity: 'even', magnitude: 'large'},
-        {number: 9, parity: 'odd', magnitude: 'large'}
+        { number: 1, parity: "odd", magnitude: "small" },
+        { number: 2, parity: "even", magnitude: "small" },
+        { number: 3, parity: "odd", magnitude: "small" },
+        { number: 4, parity: "even", magnitude: "small" },
+        { number: 6, parity: "even", magnitude: "large" },
+        { number: 7, parity: "odd", magnitude: "large" },
+        { number: 8, parity: "even", magnitude: "large" },
+        { number: 9, parity: "odd", magnitude: "large" },
       ],
       sample: {
-        type: 'fixed-repetitions',
-        size: 5
-      }
-    }
-
-    jsPsych.simulate([instructions_loop, pre_task_start, snarc], "data-only", simulation_options);
-  });
-}
-
-
-describe("snarc experiment", ()=>{
-  it("contains an equal number of all trial types", async ()=>{
-    
-    const data = await simulateExperiment();
-
-    const all_equal = [
-      data.filter({parity: 'odd', magnitude: 'small'}).count(),
-      data.filter({parity: 'odd', magnitude: 'large'}).count(),
-      data.filter({parity: 'even', magnitude: 'small'}).count(),
-      data.filter({parity: 'even', magnitude: 'large'}).count()
-    ].every((value, i, array)=>{ return value === array[0] });
-
-    expect(all_equal).toBe(true);
-  });
-
-  it("loops if the instructions check is failed", async ()=>{
-
-    let first_time = true;
-
-    const simulation_options = {
-      odd_key: {
-        data: {
-          response: ()=>{
-            if(first_time){
-              first_time = false;
-              return 1;
-            } else {
-              return 0;
-            }
-          }
-        }
+        type: "fixed-repetitions",
+        size: 5,
       },
-      even_key: {
-        data: {
-          response: 1
-        }
-      }
-    }
+    };
 
-    const data = await simulateExperiment(simulation_options);
+    const timeline = [instructions_loop, pre_task_start, snarc];
 
-    const looped = data.filter({task:'instructions-check'}).count() > 2;
-    
-    expect(looped).toBe(true);
+    return timeline;
+  }
+
+  async function simulateExperiment(simulation_options) {
+    return new Promise((resolve) => {
+      const container = document.createElement("div");
+      container.setAttribute("id", "experiment-simulation-container");
+      container.style.visibility = 'hidden';
+
+      document.querySelector('body').appendChild(container);
+
+      const jsPsych = initJsPsych({
+        display_element: "experiment-simulation-container",
+        on_finish: function () {
+          container.remove();
+          resolve(jsPsych.data.get());
+        },
+      });
+
+      const timeline = create_timeline(jsPsych);
+
+      jsPsych.simulate(timeline, "data-only", simulation_options);
+    });
+  }
+
+  describe("snarc experiment", () => {
+    it("contains an equal number of all trial types", async () => {
+      const data = await simulateExperiment();
+
+      const all_equal = [
+        data.filter({ parity: "odd", magnitude: "small" }).count(),
+        data.filter({ parity: "odd", magnitude: "large" }).count(),
+        data.filter({ parity: "even", magnitude: "small" }).count(),
+        data.filter({ parity: "even", magnitude: "large" }).count(),
+      ].every((value, i, array) => {
+        return value === array[0];
+      });
+
+      expect(all_equal).toBe(true);
+    });
+
+    it("loops if the instructions check is failed", async () => {
+      let first_time = true;
+
+      const simulation_options = {
+        odd_key: {
+          data: {
+            response: () => {
+              if (first_time) {
+                first_time = false;
+                return 1;
+              } else {
+                return 0;
+              }
+            },
+          },
+        },
+        even_key: {
+          data: {
+            response: 1,
+          },
+        },
+      };
+
+      const data = await simulateExperiment(simulation_options);
+
+      const looped = data.filter({ task: "instructions-check" }).count() > 2;
+
+      expect(looped).toBe(true);
+    });
+
+    it("does not loop if the instructions check is passed", async () => {
+      const simulation_options = {
+        odd_key: {
+          data: {
+            response: 0,
+          },
+        },
+        even_key: {
+          data: {
+            response: 1,
+          },
+        },
+      };
+
+      const data = await simulateExperiment(simulation_options);
+
+      const looped = data.filter({ task: "instructions-check" }).count() > 2;
+
+      expect(looped).toBe(false);
+    });
   });
-
-  it("does not loop if the instructions check is passed", async ()=>{
-
-    const simulation_options = {
-      odd_key: {
-        data: {
-          response: 0
-        }
-      },
-      even_key: {
-        data: {
-          response: 1
-        }
-      }
-    }
-
-    const data = await simulateExperiment(simulation_options);
-
-    const looped = data.filter({task:'instructions-check'}).count() > 2;
-
-    expect(looped).toBe(false);
-  });
-});
-
 </script>
