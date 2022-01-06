@@ -45,7 +45,7 @@
           task: "instructions-check",
         },
         on_finish: (data) => {
-          data.correct = data.response == jsPsych.timelineVariable("answer");
+          data.correct = data.response === jsPsych.timelineVariable("answer");
         },
       },
     ],
@@ -68,22 +68,14 @@
     ],
     conditional_function: () => {
       const ic_data = jsPsych.data.get().filter({ task: "instructions-check" }).last(2);
-      return !ic_data.select("correct").all((value) => {
-        return value == true;
-      });
+      return !ic_data.select("correct").all(Boolean);
     },
   };
 
   const instructions_loop = {
     timeline: [instructions, instruction_check, instructions_check_fail],
-    loop_function: (data) => {
-      return !data
-        .filter({ task: "instructions-check" })
-        .select("correct")
-        .all((value) => {
-          return value == true;
-        });
-    },
+    loop_function: (data) =>
+      !data.filter({ task: "instructions-check" }).select("correct").all(Boolean),
   };
 
   const pre_task_start = {
@@ -105,9 +97,7 @@
       },
       {
         type: jsPsychHtmlKeyboardResponse,
-        stimulus: () => {
-          return `<p class="stimulus">${jsPsych.timelineVariable("number")}</p>`;
-        },
+        stimulus: () => `<p class="stimulus">${jsPsych.timelineVariable("number")}</p>`,
         choices: ["a", "l"],
         data: {
           digit: jsPsych.timelineVariable("number"),
@@ -141,42 +131,28 @@
 
     // check that there are an equal number of all trial types
     const all_equal = [
-      data.filter({ parity: "odd", magnitude: "small" }).count(),
-      data.filter({ parity: "odd", magnitude: "large" }).count(),
-      data.filter({ parity: "even", magnitude: "small" }).count(),
-      data.filter({ parity: "even", magnitude: "large" }).count(),
-    ].every((value, i, array) => {
-      return value === array[0];
-    });
+      { parity: "odd", magnitude: "small" },
+      { parity: "odd", magnitude: "large" },
+      { parity: "even", magnitude: "small" },
+      { parity: "even", magnitude: "large" },
+    ]
+      .map((properties) => data.filter(properties).count())
+      .every((value, i, array) => value === array[0]);
 
-    if (all_equal) {
-      test_results += "<p>✔️ Equal number of all trial types</p>";
-    } else {
-      test_results += "<p>❌ Unequal number of all trial types</p>";
-    }
+    test_results += all_equal
+      ? "<p>✔️ Equal number of all trial types</p>"
+      : "<p>❌ Unequal number of all trial types</p>";
 
-    // check that answering the instructions incorrectly causes a loop
+    // check whether answering the instructions incorrectly causes a loop
     const looped = data.filter({ task: "instructions-check" }).count() > 2;
-    if (
-      !data
-        .filter({ task: "instructions-check" })
-        .first(2)
-        .select("correct")
-        .all((x) => {
-          return x == true;
-        })
-    ) {
-      if (looped) {
-        test_results += "<p>✔️ Instructions looped on check fail</p>";
-      } else {
-        test_results += "<p>❌ Instructions did not loop on check fail</p>";
-      }
+    if (!data.filter({ task: "instructions-check" }).first(2).select("correct").all(Boolean)) {
+      test_results += looped
+        ? "<p>✔️ Instructions looped on check fail</p>"
+        : "<p>❌ Instructions did not loop on check fail</p>";
     } else {
-      if (!looped) {
-        test_results += "<p>✔️ Instructions did not loop on check pass</p>";
-      } else {
-        test_results += "<p>❌ Instructions looped on check pass</p>";
-      }
+      test_results += looped
+        ? "<p>❌ Instructions looped on check pass</p>"
+        : "<p>✔️ Instructions did not loop on check pass</p>";
     }
 
     jsPsych.getDisplayElement().innerHTML = test_results;
