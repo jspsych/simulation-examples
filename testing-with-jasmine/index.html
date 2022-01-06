@@ -7,10 +7,7 @@
   <script src="https://cdn.jsdelivr.net/npm/jasmine-core@3.10.1/lib/jasmine-core/jasmine-html.js"></script>
   <script src="https://cdn.jsdelivr.net/npm/jasmine-core@3.10.1/lib/jasmine-core/boot0.js"></script>
   <script src="https://cdn.jsdelivr.net/npm/jasmine-core@3.10.1/lib/jasmine-core/boot1.js"></script>
-  <link
-    rel="stylesheet"
-    href="https://unpkg.com/jspsych@7.1.2/css/jspsych.css"
-  />
+  <link rel="stylesheet" href="https://unpkg.com/jspsych@7.1.2/css/jspsych.css" />
   <link
     rel="stylesheet"
     href="https://cdn.jsdelivr.net/npm/jasmine-core@3.10.1/lib/jasmine-core/jasmine.css"
@@ -23,7 +20,6 @@
 </head>
 <body></body>
 <script>
-
   function create_timeline(jsPsych) {
     const instructions = {
       type: jsPsychHtmlButtonResponse,
@@ -75,10 +71,7 @@
         },
       ],
       conditional_function: () => {
-        const ic_data = jsPsych.data
-          .get()
-          .filter({ task: "instructions-check" })
-          .last(2);
+        const ic_data = jsPsych.data.get().filter({ task: "instructions-check" }).last(2);
         return !ic_data.select("correct").all((value) => {
           return value == true;
         });
@@ -117,9 +110,7 @@
         {
           type: jsPsychHtmlKeyboardResponse,
           stimulus: () => {
-            return `<p class="stimulus">${jsPsych.timelineVariable(
-              "number"
-            )}</p>`;
+            return `<p class="stimulus">${jsPsych.timelineVariable("number")}</p>`;
           },
           choices: ["a", "l"],
           data: {
@@ -154,9 +145,9 @@
     return new Promise((resolve) => {
       const container = document.createElement("div");
       container.setAttribute("id", "experiment-simulation-container");
-      container.style.visibility = 'hidden';
+      container.style.visibility = "hidden";
 
-      document.querySelector('body').appendChild(container);
+      document.querySelector("body").appendChild(container);
 
       const jsPsych = initJsPsych({
         display_element: "experiment-simulation-container",
