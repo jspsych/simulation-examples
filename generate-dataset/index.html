@@ -1,0 +1,133 @@
+<!DOCTYPE html>
+<head>
+  <script src="https://unpkg.com/jspsych@7.1.1"></script>
+  <script src="https://unpkg.com/@jspsych/plugin-html-keyboard-response/dist/index.browser.js"></script>
+  <script src="simulation_options.js"></script>
+  <link rel="stylesheet" href="https://unpkg.com/jspsych@7.1.1/css/jspsych.css">
+  <style>
+    .stimulus {
+      font-size: 48px;
+      font-weight: bold;
+    }
+
+    .red {
+      color: red;
+    }
+
+    .green {
+      color: green;
+    }
+
+    .blue {
+      color: blue;
+    }
+  </style>
+</head>
+<body>
+</body>
+<script>
+  const jsPsych = initJsPsych();
+
+  const instructions = {
+    type: jsPsychHtmlKeyboardResponse,
+    stimulus: `<p>You'll see a word on the screen like this:</p>
+      <p class="stimulus red">GREEN</p>
+      <p>Press R if the color of the word is red, G if it is green, and B if it is blue.</p>
+      <p>For this trial, you would press R because the color of the word is red.</p>
+      <p>Press R to continue.</p>`,
+    choices: ['r']
+  }
+
+  const ready = {
+    type: jsPsychHtmlKeyboardResponse,
+    stimulus: `<p>There are 48 trials.</p><p>Press R, G, or B to begin.</p>`,
+    choices: ['r', 'g', 'b']
+  }
+
+  const fixation = {
+    type: jsPsychHtmlKeyboardResponse,
+    stimulus: `<p class="stimulus">+</p>`,
+    choices: "NO_KEYS",
+    trial_duration: 250,
+  }
+
+  const stroop_trial = {
+    type: jsPsychHtmlKeyboardResponse,
+    stimulus: () => {
+      return `<p class="stimulus ${jsPsych.timelineVariable('color')}">${jsPsych.timelineVariable('word')}</p>`
+    },
+    choices: ['r','g','b'],
+    data: {
+      color: jsPsych.timelineVariable('color'),
+      word: jsPsych.timelineVariable('word'),
+      stroop_type: jsPsych.timelineVariable('stroop_type'),
+    },
+    simulation_options: jsPsych.timelineVariable('stroop_type'),
+    on_finish: (data) => {
+      data.correct = data.response == data.color.substring(0,1);
+    }
+  }
+
+  const stroop_test = {
+    timeline: [fixation, stroop_trial],
+    timeline_variables: [
+      {color: 'red', word: 'RED', stroop_type: 'congruent'},
+      {color: 'green', word: 'GREEN', stroop_type: 'congruent'},
+      {color: 'blue', word: 'BLUE', stroop_type: 'congruent'},
+      {color: 'red', word: 'RED', stroop_type: 'congruent'},
+      {color: 'green', word: 'GREEN', stroop_type: 'congruent'},
+      {color: 'blue', word: 'BLUE', stroop_type: 'congruent'},
+      {color: 'green', word: 'RED', stroop_type: 'incongruent'},
+      {color: 'blue', word: 'RED', stroop_type: 'incongruent'},
+      {color: 'red', word: 'GREEN', stroop_type: 'incongruent'},
+      {color: 'blue', word: 'GREEN', stroop_type: 'incongruent'},
+      {color: 'red', word: 'BLUE', stroop_type: 'incongruent'},
+      {color: 'green', word: 'BLUE', stroop_type: 'incongruent'},
+    ],
+    randomize_order: true,
+    repetitions: 4,
+  }
+
+  const done = {
+    type: jsPsychHtmlKeyboardResponse,
+    stimulus: ()=>{
+
+      const data = jsPsych.data.get()
+      const congruent_trials = data.filter({stroop_type: 'congruent'});
+      const incongruent_trials = data.filter({stroop_type: 'incongruent'});
+
+      const avg_rt_congruent = congruent_trials
+        .filter({correct: true})
+        .select('rt')
+        .mean();
+
+      const avg_rt_incongruent = incongruent_trials
+        .filter({correct: true})
+        .select('rt')
+        .mean();
+
+      const correct_percent_congruent = congruent_trials
+        .filter({correct: true})
+        .count() / congruent_trials.count() * 100;
+
+      const correct_percent_incongruent = incongruent_trials
+        .filter({correct: true})
+        .count() / incongruent_trials.count() * 100;
+
+      return `<p>Done!</p>
+        <p>Your average response time for congruent trials was: ${Math.round(avg_rt_congruent)} ms (${Math.round(correct_percent_congruent)}% correct)</p>
+        <p>Your average response time for incongruent trials was: ${Math.round(avg_rt_incongruent)} ms (${Math.round(correct_percent_incongruent)}% correct)</p>`
+    },
+    choices: "NO_KEYS",
+    simulation_options: {
+      simulate: false
+    }
+  }
+
+  const timeline = [instructions, ready, stroop_test, done]
+
+  const simulation_options = create_simulation_options(jsPsych);
+
+  jsPsych.simulate(timeline, "data-only", simulation_options);
+
+</script>
