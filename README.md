@@ -28,6 +28,9 @@ When building experiments it can be helpful to skip over portions of the experim
 
 ## Use Case 4: Visualizing Participant Behavior
 
+jsPsych's simulation mode can execute in two modes. In all the other examples we used `data-only` mode, which generates simulated data quickly without running the actual trials. The other option, `visual` mode, runs the experiment in real time so that the researcher can watch the experiment progress. This has a variety of potential uses, such as a rapid timelapse-style playthrough of the experiment for demo purposes, but here we highlight one particularly intriguing possibility: the ability to "playback" participant behavior. By running the simulation with parameters taken from a an actual run of the experiment, the visual simulation becomes a movie of what a participant actually did in the experiment.
+
+**Example: Replaying a Serial Response Time Task**. This example requires you to complete the short experiment, after which your behavior will be played back to you via simulation. [Code](), [Live Demo]().
 
 
 
