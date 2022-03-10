@@ -121,6 +121,9 @@
     choices: "NO_KEYS",
     simulation_options: {
       simulate: false
+    },
+    on_start: ()=>{
+      jsPsych.data.get().localSave('json', `generated-data-${jsPsych.randomization.randomID(5)}.json`)
     }
   }
 
