@@ -14,3 +14,20 @@ Researchers can use simulation mode to automatically test the behavior of experi
 
 **Example 2: Testing with a Framework**. This example uses the same experiment, but uses the Jasmine testing library to run the tests. [Code](), [Live Demo]().
 
+## Use Case 2: Generating Simulated Datasets
+
+Simulation can be used to generate datasets that will have the same exact structure as the final data, ensuring that analysis scripts built prior to data collection will work properly. Customizing the parameters of the simulation also allows the researcher to generate datasets with known properties, such as effect sizes or the frequency of outliers.
+
+**Example: Customizing Parameters**. This simulation of a Stroop task uses the `simulation_options` and a [configuration file]() to control the response time distributions for incongruent and congruent trials. It also includes a parameter to control the probability that a subject will be inattentive and just respond as quickly as possible to everything. [Code](), [Live Demo]().
+
+## Use Case 3: Speeding Up Development
+
+When building experiments it can be helpful to skip over portions of the experiment that are already complete to test the piece that is being actively developed. In some cases, earlier portions of the experiment can simply be commented out, but sometimes there are complex dependencies where the piece under development depends on information generated during a previous section. Simulation can help by simulating *part* of an experiment, generating the data that is needed to test a later portion.
+
+**Example: Developing a Feedback Screen**. This example simulates a visual search task but skips the simulation for the final feedback screen, allowing the researcher to get quick feedback on changes being made to that piece of the experiment. [Code](), [Live Demo]().
+
+## Use Case 4: Visualizing Participant Behavior
+
+
+
+
