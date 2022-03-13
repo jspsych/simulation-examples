@@ -3,15 +3,17 @@ describe("snarc experiment", () => {
     const data = await simulateExperiment();
 
     const all_equal = [
-      data.filter({ parity: "odd", magnitude: "small" }).count(),
-      data.filter({ parity: "odd", magnitude: "large" }).count(),
-      data.filter({ parity: "even", magnitude: "small" }).count(),
-      data.filter({ parity: "even", magnitude: "large" }).count(),
-    ].every((value, i, array) => {
-      return value === array[0];
-    });
+      { parity: "odd", magnitude: "small" },
+      { parity: "odd", magnitude: "large" },
+      { parity: "even", magnitude: "small" },
+      { parity: "even", magnitude: "large" },
+    ]
+      .map((properties) => data.filter(properties).count())
+      .every((value, i, array) => {
+        return value === array[0];
+      });
 
-    expect(all_equal).toBe(true);
+    expect(all_equal).toBeTrue();
   });
 
   it("loops if the instructions check is failed", async () => {
@@ -41,7 +43,7 @@ describe("snarc experiment", () => {
 
     const looped = data.filter({ task: "instructions-check" }).count() > 2;
 
-    expect(looped).toBe(true);
+    expect(looped).toBeTrue();
   });
 
   it("does not loop if the instructions check is passed", async () => {
@@ -62,6 +64,6 @@ describe("snarc experiment", () => {
 
     const looped = data.filter({ task: "instructions-check" }).count() > 2;
 
-    expect(looped).toBe(false);
+    expect(looped).toBeFalse();
   });
 });
