@@ -2,7 +2,7 @@
 
 This repository contains the code for the examples described in our paper on building a tool for automatically simulating participant behavior in jsPsych.
 
-> de Leeuw, J. R., Gilbert, R. A., Petrov, N., Luchterhandt, B. (2022). Simulating Behavior to Help Researchers Build Experiments. *PsyArXiv*, [link here](#).
+> de Leeuw, J. R., Gilbert, R. A., Petrov, N., Luchterhandt, B. (2022). Simulating Behavior to Help Researchers Build Experiments. *PsyArXiv*, [https://psyarxiv.com/mq345](https://psyarxiv.com/mq345).
 
 The paper describes the motivation for and implementation of a tool that allows researchers to automatically simulate participant behavior for most jsPsych experiments. It covers four scenarios where we think this functionality is useful.
 
